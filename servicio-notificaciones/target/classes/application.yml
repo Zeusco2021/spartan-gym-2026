@@ -1,0 +1,13 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: servicio-notificaciones
+  kafka:
+    bootstrap-servers: localhost:9092
+
+aws:
+  dynamodb:
+    endpoint: http://localhost:8000
+    region: us-east-1

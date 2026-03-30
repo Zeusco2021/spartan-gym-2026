@@ -1,0 +1,3 @@
+com\spartangoldengym\gateway\filter\JwtAuthenticationFilterTest.class
+com\spartangoldengym\gateway\filter\RateLimitingFilterTest.class
+com\spartangoldengym\gateway\filter\RateLimitingFilterProperties.class

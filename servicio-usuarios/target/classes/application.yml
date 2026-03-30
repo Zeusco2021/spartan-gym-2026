@@ -1,0 +1,23 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: servicio-usuarios
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spartan_usuarios
+    username: spartan
+    password: spartan
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  redis:
+    host: localhost
+    port: 6379
+  kafka:
+    bootstrap-servers: localhost:9092
+
+jwt:
+  secret: spartan-golden-gym-default-secret-key-change-in-production
+  expiration-ms: 3600000

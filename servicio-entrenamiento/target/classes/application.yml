@@ -1,0 +1,16 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: servicio-entrenamiento
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spartan_entrenamiento
+    username: spartan
+    password: spartan
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  kafka:
+    bootstrap-servers: localhost:9092

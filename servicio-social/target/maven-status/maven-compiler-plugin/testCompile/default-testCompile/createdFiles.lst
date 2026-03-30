@@ -1,0 +1,7 @@
+com\spartangoldengym\social\service\RankingServiceTest.class
+com\spartangoldengym\social\service\AchievementServiceTest.class
+com\spartangoldengym\social\service\GroupServiceTest.class
+com\spartangoldengym\social\service\ChallengeServiceTest.class
+com\spartangoldengym\social\service\InteractionServiceTest.class
+com\spartangoldengym\social\service\WorkoutSyncServiceTest.class
+com\spartangoldengym\social\service\ShareServiceTest.class

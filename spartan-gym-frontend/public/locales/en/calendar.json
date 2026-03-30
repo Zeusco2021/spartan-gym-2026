@@ -1,0 +1,11 @@
+{
+  "title": "Calendar",
+  "monthly": "Monthly",
+  "weekly": "Weekly",
+  "daily": "Daily",
+  "newEvent": "New Event",
+  "editEvent": "Edit Event",
+  "conflict": "Schedule Conflict",
+  "syncCalendar": "Sync Calendar",
+  "reminder": "Reminder"
+}

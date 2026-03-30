@@ -1,0 +1,16 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: servicio-reservas
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spartan_reservas
+    username: spartan
+    password: spartan
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  kafka:
+    bootstrap-servers: localhost:9092

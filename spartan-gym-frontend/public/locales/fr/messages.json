@@ -1,0 +1,11 @@
+{
+  "conversations": "Conversations",
+  "newMessage": "Nouveau message",
+  "typeMessage": "Écrivez un message...",
+  "sent": "Envoyé",
+  "delivered": "Livré",
+  "read": "Lu",
+  "typing": "en train d'écrire...",
+  "unread": "Non lu",
+  "online": "En ligne"
+}

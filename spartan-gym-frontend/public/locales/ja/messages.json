@@ -1,0 +1,11 @@
+{
+  "conversations": "会話",
+  "newMessage": "新しいメッセージ",
+  "typeMessage": "メッセージを入力...",
+  "sent": "送信済み",
+  "delivered": "配信済み",
+  "read": "既読",
+  "typing": "入力中...",
+  "unread": "未読",
+  "online": "オンライン"
+}

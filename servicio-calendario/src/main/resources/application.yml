@@ -1,0 +1,14 @@
+server:
+  port: 8093
+
+spring:
+  application:
+    name: servicio-calendario
+  datasource:
+    url: jdbc:postgresql://localhost:5432/spartan_calendario
+    username: spartan
+    password: spartan
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false

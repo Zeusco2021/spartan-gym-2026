@@ -1,0 +1,5 @@
+com\spartangoldengym\pagos\service\RefundServiceTest.class
+com\spartangoldengym\pagos\service\DonationServiceTest.class
+com\spartangoldengym\pagos\service\TransactionServiceTest.class
+com\spartangoldengym\pagos\service\PaymentMethodServiceTest.class
+com\spartangoldengym\pagos\service\SubscriptionServiceTest.class

@@ -1,0 +1,188 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      default-filters:
+        - name: CircuitBreaker
+          args:
+            name: defaultCircuitBreaker
+            fallbackUri: forward:/fallback
+      routes:
+        - id: servicio-usuarios
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioUsuarios
+                fallbackUri: forward:/fallback
+        - id: servicio-gimnasio
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/gyms/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioGimnasio
+                fallbackUri: forward:/fallback
+        - id: servicio-entrenamiento
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/training/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioEntrenamiento
+                fallbackUri: forward:/fallback
+        - id: servicio-seguimiento
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/workouts/**,/api/wearables/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioSeguimiento
+                fallbackUri: forward:/fallback
+        - id: servicio-nutricion
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/nutrition/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioNutricion
+                fallbackUri: forward:/fallback
+        - id: servicio-ia-coach
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/ai/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioIaCoach
+                fallbackUri: forward:/fallback
+        - id: servicio-social
+          uri: http://localhost:8087
+          predicates:
+            - Path=/api/social/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioSocial
+                fallbackUri: forward:/fallback
+        - id: servicio-pagos
+          uri: http://localhost:8088
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioPagos
+                fallbackUri: forward:/fallback
+        - id: servicio-analiticas
+          uri: http://localhost:8089
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioAnaliticas
+                fallbackUri: forward:/fallback
+        - id: servicio-notificaciones
+          uri: http://localhost:8090
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioNotificaciones
+                fallbackUri: forward:/fallback
+        - id: servicio-reservas
+          uri: http://localhost:8091
+          predicates:
+            - Path=/api/bookings/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioReservas
+                fallbackUri: forward:/fallback
+        - id: servicio-mensajeria
+          uri: http://localhost:8092
+          predicates:
+            - Path=/api/messages/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioMensajeria
+                fallbackUri: forward:/fallback
+        - id: servicio-calendario
+          uri: http://localhost:8093
+          predicates:
+            - Path=/api/calendar/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: servicioCalendario
+                fallbackUri: forward:/fallback
+
+  redis:
+    host: localhost
+    port: 6379
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      defaultCircuitBreaker:
+        baseConfig: default
+      servicioUsuarios:
+        baseConfig: default
+      servicioGimnasio:
+        baseConfig: default
+      servicioEntrenamiento:
+        baseConfig: default
+      servicioSeguimiento:
+        baseConfig: default
+      servicioNutricion:
+        baseConfig: default
+      servicioIaCoach:
+        baseConfig: default
+      servicioSocial:
+        baseConfig: default
+      servicioPagos:
+        baseConfig: default
+      servicioAnaliticas:
+        baseConfig: default
+      servicioNotificaciones:
+        baseConfig: default
+      servicioReservas:
+        baseConfig: default
+      servicioMensajeria:
+        baseConfig: default
+      servicioCalendario:
+        baseConfig: default
+
+gateway:
+  jwt:
+    secret: ${JWT_SECRET:spartan-golden-gym-default-secret-key-change-in-production}
+    public-paths:
+      - /api/users/register
+      - /api/users/login
+      - /fallback
+
+logging:
+  level:
+    com.spartangoldengym.gateway: DEBUG
+    io.github.resilience4j: DEBUG

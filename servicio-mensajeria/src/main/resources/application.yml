@@ -1,0 +1,11 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: servicio-mensajeria
+
+aws:
+  dynamodb:
+    endpoint: http://localhost:8000
+    region: us-east-1

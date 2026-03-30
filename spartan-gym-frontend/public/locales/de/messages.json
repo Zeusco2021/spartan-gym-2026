@@ -1,0 +1,11 @@
+{
+  "conversations": "Unterhaltungen",
+  "newMessage": "Neue Nachricht",
+  "typeMessage": "Nachricht eingeben...",
+  "sent": "Gesendet",
+  "delivered": "Zugestellt",
+  "read": "Gelesen",
+  "typing": "schreibt...",
+  "unread": "Ungelesen",
+  "online": "Online"
+}

@@ -1,0 +1,13 @@
+{
+  "loading": "Chargement...",
+  "error": "Une erreur est survenue",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "confirm": "Confirmer",
+  "back": "Retour",
+  "next": "Suivant",
+  "search": "Rechercher",
+  "noResults": "Aucun résultat trouvé",
+  "retry": "Réessayer"
+}

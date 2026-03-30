@@ -1,0 +1,10 @@
+{
+  "clients": "担当クライアント",
+  "assignPlan": "プランを割り当て",
+  "createPlan": "プランを作成",
+  "clientProgress": "クライアントの進捗",
+  "sessionNotes": "セッションノート",
+  "availability": "空き状況",
+  "alerts": "進捗アラート",
+  "planEditor": "プランエディター"
+}

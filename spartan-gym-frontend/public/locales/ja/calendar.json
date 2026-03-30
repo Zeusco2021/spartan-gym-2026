@@ -1,0 +1,11 @@
+{
+  "title": "カレンダー",
+  "monthly": "月表示",
+  "weekly": "週表示",
+  "daily": "日表示",
+  "newEvent": "新しいイベント",
+  "editEvent": "イベントを編集",
+  "conflict": "スケジュールの競合",
+  "syncCalendar": "カレンダーを同期",
+  "reminder": "リマインダー"
+}

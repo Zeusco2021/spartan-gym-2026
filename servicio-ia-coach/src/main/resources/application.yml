@@ -1,0 +1,13 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: servicio-ia-coach
+  kafka:
+    bootstrap-servers: localhost:9092
+
+aws:
+  sagemaker:
+    endpoint: http://localhost:8793
+    region: us-east-1
