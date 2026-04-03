@@ -1,1 +1,17 @@
+com\spartangoldengym\calendario\dto\ConflictResponse$ConflictPair.class
+com\spartangoldengym\calendario\sync\AppleCalendarProvider.class
+com\spartangoldengym\calendario\sync\ExternalCalendarProvider.class
 com\spartangoldengym\calendario\ServicioCalendarioApplication.class
+com\spartangoldengym\calendario\consumer\BookingEventConsumer.class
+com\spartangoldengym\calendario\controller\CalendarController.class
+com\spartangoldengym\calendario\sync\OutlookCalendarProvider.class
+com\spartangoldengym\calendario\entity\CalendarEvent.class
+com\spartangoldengym\calendario\service\CalendarService.class
+com\spartangoldengym\calendario\dto\UpdateEventRequest.class
+com\spartangoldengym\calendario\dto\CreateEventRequest.class
+com\spartangoldengym\calendario\dto\ConflictResponse.class
+com\spartangoldengym\calendario\repository\CalendarEventRepository.class
+com\spartangoldengym\calendario\dto\SyncRequest.class
+com\spartangoldengym\calendario\dto\SyncResponse.class
+com\spartangoldengym\calendario\dto\EventResponse.class
+com\spartangoldengym\calendario\sync\GoogleCalendarProvider.class

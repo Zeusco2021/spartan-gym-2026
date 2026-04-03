@@ -61,6 +61,7 @@ function AlternativesButton({ exercise }: { exercise: RoutineExercise }) {
         variant="outlined"
         startIcon={<FitnessCenterIcon />}
         onClick={() => setOpen(true)}
+        aria-label={t('showAlternatives')}
       >
         {t('showAlternatives')}
       </Button>
@@ -112,6 +113,8 @@ function WarmupSection({ routineId }: { routineId: string }) {
         size="small"
         variant="text"
         onClick={() => setExpanded((prev) => !prev)}
+        aria-label={t('showWarmup')}
+        aria-expanded={expanded}
         endIcon={<ExpandMoreIcon sx={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />}
       >
         {t('showWarmup')}
@@ -246,7 +249,7 @@ export default function PlanDetailPage() {
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                         {t('videoTutorial')}
                       </Typography>
-                      <VideoPlayer src={re.exercise.videoUrl} />
+                      <VideoPlayer src={re.exercise.videoUrl} ariaLabel={`${re.exercise.name} tutorial video`} />
                     </Box>
                   )}
 

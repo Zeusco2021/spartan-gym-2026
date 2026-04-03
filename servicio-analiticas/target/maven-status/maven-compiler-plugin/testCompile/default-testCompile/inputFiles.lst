@@ -1,0 +1,6 @@
+D:\Kiro Projects\SpartanGym\servicio-analiticas\src\test\java\com\spartangoldengym\analiticas\consumer\AnalyticsEventConsumerTest.java
+D:\Kiro Projects\SpartanGym\servicio-analiticas\src\test\java\com\spartangoldengym\analiticas\config\KafkaStreamsConfigTest.java
+D:\Kiro Projects\SpartanGym\servicio-analiticas\src\test\java\com\spartangoldengym\analiticas\service\AnalyticsServiceTest.java
+D:\Kiro Projects\SpartanGym\servicio-analiticas\src\test\java\com\spartangoldengym\analiticas\stream\KafkaStreamsTopologyTest.java
+D:\Kiro Projects\SpartanGym\servicio-analiticas\src\test\java\com\spartangoldengym\analiticas\repository\InMemoryMetricsStoreTest.java
+D:\Kiro Projects\SpartanGym\servicio-analiticas\src\test\java\com\spartangoldengym\analiticas\controller\AnalyticsControllerTest.java

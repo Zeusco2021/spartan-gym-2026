@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Box,
   Card,
@@ -9,13 +10,15 @@ import {
   LinearProgress,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useGetWorkoutHistoryQuery } from '@/api/workoutsApi';
+import { useGetWorkoutHistoryQuery, useGetProgressQuery } from '@/api/workoutsApi';
 import { useGetClassesQuery } from '@/api/bookingsApi';
 import { useGetDailyBalanceQuery } from '@/api/nutritionApi';
 import { useGetAchievementsQuery } from '@/api/socialApi';
+import { ProgressChart } from '@/components/Charts';
 
 export default function ClientDashboard() {
   const { t } = useTranslation('dashboard');
+  const [progressPeriod, setProgressPeriod] = useState<'day' | 'month' | 'year'>('month');
 
   const {
     data: workoutData,
@@ -41,6 +44,12 @@ export default function ClientDashboard() {
     isError: achievementsError,
   } = useGetAchievementsQuery(undefined, { refetchOnMountOrArgChange: true });
 
+  const {
+    data: progressData,
+    isLoading: progressLoading,
+    isError: progressError,
+  } = useGetProgressQuery({ period: progressPeriod }, { refetchOnMountOrArgChange: true });
+
   return (
     <Grid container spacing={3}>
       {/* Training Summary */}
@@ -50,7 +59,7 @@ export default function ClientDashboard() {
             <Typography variant="h6" gutterBottom>
               {t('trainingSummary')}
             </Typography>
-            {workoutsLoading && <CircularProgress size={24} />}
+            {workoutsLoading && <CircularProgress aria-label={t('loading')} size={24} />}
             {workoutsError && <Alert severity="error">{t('error')}</Alert>}
             {workoutData && (
               <Box>
@@ -84,7 +93,7 @@ export default function ClientDashboard() {
             <Typography variant="h6" gutterBottom>
               {t('upcomingClasses')}
             </Typography>
-            {classesLoading && <CircularProgress size={24} />}
+            {classesLoading && <CircularProgress aria-label={t('loading')} size={24} />}
             {classesError && <Alert severity="error">{t('error')}</Alert>}
             {classesData && (
               <Box>
@@ -116,7 +125,7 @@ export default function ClientDashboard() {
             <Typography variant="h6" gutterBottom>
               {t('nutritionBalance')}
             </Typography>
-            {balanceLoading && <CircularProgress size={24} />}
+            {balanceLoading && <CircularProgress aria-label={t('loading')} size={24} />}
             {balanceError && <Alert severity="error">{t('error')}</Alert>}
             {balanceData && (
               <Box>
@@ -153,7 +162,7 @@ export default function ClientDashboard() {
             <Typography variant="h6" gutterBottom>
               {t('recentAchievements')}
             </Typography>
-            {achievementsLoading && <CircularProgress size={24} />}
+            {achievementsLoading && <CircularProgress aria-label={t('loading')} size={24} />}
             {achievementsError && <Alert severity="error">{t('error')}</Alert>}
             {achievements && (
               <Box>
@@ -185,6 +194,20 @@ export default function ClientDashboard() {
             )}
           </CardContent>
         </Card>
+      </Grid>
+
+      {/* Progress Chart */}
+      <Grid size={{ xs: 12 }}>
+        {progressLoading && <CircularProgress aria-label={t('loading')} />}
+        {progressError && <Alert severity="error">{t('error')}</Alert>}
+        {progressData && (
+          <ProgressChart
+            data={progressData.data}
+            defaultPeriod={progressPeriod}
+            onPeriodChange={setProgressPeriod}
+            title={t('progressChart')}
+          />
+        )}
       </Grid>
     </Grid>
   );

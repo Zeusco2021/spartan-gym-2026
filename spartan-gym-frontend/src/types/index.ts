@@ -81,3 +81,5 @@ export type {
   NotificationPreferences,
   AppNotification,
 } from './notifications';
+
+export type { TrainerClient } from './trainer';

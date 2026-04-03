@@ -6,6 +6,8 @@ import {
   addIncomingMessage,
   updateOccupancy,
   setTypingUsers,
+  updateRanking,
+  updateLiveWorkout,
 } from '@/features/websocket/websocketSlice';
 import { messagesApi } from '@/api/messagesApi';
 import { notificationsApi } from '@/api/notificationsApi';
@@ -76,6 +78,22 @@ class SocketService {
       },
     );
 
+    // Rankings
+    this.socket.on(
+      'ranking:update',
+      (data: { category: string; entries: Array<{ userId: string; score: number; rank: number }> }) => {
+        dispatch(updateRanking(data));
+      },
+    );
+
+    // Live workout sync
+    this.socket.on(
+      'workout:live',
+      (data: { userId: string; sessionId: string; currentExercise: string; progress: number }) => {
+        dispatch(updateLiveWorkout(data));
+      },
+    );
+
     // Real-time notifications
     this.socket.on('notification:new', () => {
       dispatch(notificationsApi.util.invalidateTags(['Notification']));
@@ -104,6 +122,22 @@ class SocketService {
 
   leaveGymOccupancy(gymId: string): void {
     this.socket?.emit('gym:unsubscribe', { gymId });
+  }
+
+  joinRanking(category: string): void {
+    this.socket?.emit('ranking:subscribe', { category });
+  }
+
+  leaveRanking(category: string): void {
+    this.socket?.emit('ranking:unsubscribe', { category });
+  }
+
+  joinLiveWorkout(sessionId: string): void {
+    this.socket?.emit('workout:live:join', { sessionId });
+  }
+
+  leaveLiveWorkout(sessionId: string): void {
+    this.socket?.emit('workout:live:leave', { sessionId });
   }
 
   disconnect(): void {

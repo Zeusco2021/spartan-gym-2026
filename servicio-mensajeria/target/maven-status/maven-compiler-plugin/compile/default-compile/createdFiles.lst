@@ -1,1 +1,14 @@
+com\spartangoldengym\mensajeria\service\MessageService.class
+com\spartangoldengym\mensajeria\dto\MessageResponse.class
+com\spartangoldengym\mensajeria\dto\SendMessageRequest.class
+com\spartangoldengym\mensajeria\repository\MessageRepository.class
+com\spartangoldengym\mensajeria\repository\InMemoryMessageRepository.class
+com\spartangoldengym\mensajeria\model\Conversation.class
+com\spartangoldengym\mensajeria\controller\ChatWebSocketHandler.class
+com\spartangoldengym\mensajeria\config\WebSocketConfig.class
+com\spartangoldengym\mensajeria\dto\ConversationResponse.class
 com\spartangoldengym\mensajeria\ServicioMensajeriaApplication.class
+com\spartangoldengym\mensajeria\model\Message.class
+com\spartangoldengym\mensajeria\service\MessageEncryptionService.class
+com\spartangoldengym\mensajeria\controller\MessageController.class
+com\spartangoldengym\mensajeria\controller\ChatWebSocketHandler$ReadReceiptEvent.class

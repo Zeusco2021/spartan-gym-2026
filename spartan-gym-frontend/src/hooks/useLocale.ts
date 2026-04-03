@@ -15,8 +15,14 @@ export function useLocale() {
   const formatDate = (date: string) =>
     new Intl.DateTimeFormat(locale).format(new Date(date));
 
+  const formatTime = (date: string) =>
+    new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(new Date(date));
+
   const formatCurrency = (amount: number, currency: string) =>
     new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount);
+
+  const formatNumber = (value: number, options?: Intl.NumberFormatOptions) =>
+    new Intl.NumberFormat(locale, options).format(value);
 
   const formatWeight = (kg: number) =>
     measurementUnit === 'imperial'
@@ -28,5 +34,15 @@ export function useLocale() {
       ? `${(km * 0.621371).toFixed(1)} mi`
       : `${km} km`;
 
-  return { locale, changeLocale, formatDate, formatCurrency, formatWeight, formatDistance };
+  return {
+    locale,
+    measurementUnit,
+    changeLocale,
+    formatDate,
+    formatTime,
+    formatCurrency,
+    formatNumber,
+    formatWeight,
+    formatDistance,
+  };
 }

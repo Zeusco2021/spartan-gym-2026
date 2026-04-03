@@ -70,6 +70,12 @@ export const paymentsApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+    removePaymentMethod: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/api/payments/methods/${id}`,
+        method: 'DELETE',
+      }),
+    }),
   }),
 });
 
@@ -81,4 +87,5 @@ export const {
   useDonateMutation,
   useGetPaymentMethodsQuery,
   useAddPaymentMethodMutation,
+  useRemovePaymentMethodMutation,
 } = paymentsApi;

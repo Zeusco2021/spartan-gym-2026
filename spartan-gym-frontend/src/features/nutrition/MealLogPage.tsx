@@ -74,7 +74,7 @@ export default function MealLogPage() {
       )}
       {logError && <Alert severity="error" sx={{ mb: 2 }}>{t('error')}</Alert>}
 
-      <Card sx={{ mb: 3 }}>
+      <Card>
         <CardContent>
           {/* Food Search */}
           <TextField
@@ -90,13 +90,16 @@ export default function MealLogPage() {
             sx={{ mb: 2 }}
           />
 
-          {searchLoading && <CircularProgress size={24} />}
+          {searchLoading && <CircularProgress size={24} aria-label={t('loading')} />}
 
           {!selectedFood && foods && foods.content.length > 0 && searchQuery.length >= 2 && (
-            <List sx={{ maxHeight: 200, overflow: 'auto', mb: 2 }}>
+            <List aria-label={t('foodResults')} sx={{ maxHeight: 200, overflow: 'auto', mb: 2 }}>
               {foods.content.map((food) => (
                 <ListItem key={food.id} disablePadding>
-                  <ListItemButton onClick={() => handleSelectFood(food)}>
+                  <ListItemButton
+                    onClick={() => handleSelectFood(food)}
+                    aria-label={`${t('selectFood')} ${food.name}`}
+                  >
                     <ListItemText
                       primary={food.name}
                       secondary={`${food.caloriesPer100g} ${t('kcal')} | P: ${food.proteinPer100g}${t('grams')} | C: ${food.carbsPer100g}${t('grams')} | F: ${food.fatPer100g}${t('grams')} (${t('foodInfo')})`}
@@ -128,7 +131,7 @@ export default function MealLogPage() {
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              slotProps={{ htmlInput: { min: 1 } }}
+              slotProps={{ htmlInput: { min: 1, 'aria-label': t('quantity') } }}
               sx={{ minWidth: 150 }}
             />
             <TextField
@@ -137,6 +140,7 @@ export default function MealLogPage() {
               value={mealType}
               onChange={(e) => setMealType(e.target.value)}
               sx={{ minWidth: 150 }}
+              slotProps={{ htmlInput: { 'aria-label': t('mealType') } }}
             >
               {MEAL_TYPES.map((type) => (
                 <MenuItem key={type} value={type}>
@@ -150,8 +154,9 @@ export default function MealLogPage() {
             variant="contained"
             onClick={handleSubmit}
             disabled={!selectedFood || logging || qtyNum <= 0}
+            aria-label={t('addMeal')}
           >
-            {logging ? <CircularProgress size={20} /> : t('addMeal')}
+            {logging ? <CircularProgress size={20} aria-label={t('loading')} /> : t('addMeal')}
           </Button>
         </CardContent>
       </Card>

@@ -125,6 +125,7 @@ export default function NotificationSettingsPage() {
                   <Switch
                     checked={local[ch]}
                     onChange={() => toggleGlobal(ch)}
+                    aria-label={t(`${ch}Channel`)}
                   />
                 }
                 label={t(`${ch}Channel`)}
@@ -163,6 +164,7 @@ export default function NotificationSettingsPage() {
                           size="small"
                           checked={catPrefs[ch]}
                           onChange={() => toggleCategory(cat, ch)}
+                          aria-label={`${t(cat)} ${t(`${ch}Channel`)}`}
                         />
                       </TableCell>
                     ))}
@@ -180,6 +182,7 @@ export default function NotificationSettingsPage() {
         onClick={handleSave}
         disabled={isSaving}
         startIcon={isSaving ? <CircularProgress size={20} /> : undefined}
+        aria-label={t('save')}
       >
         {t('save')}
       </Button>

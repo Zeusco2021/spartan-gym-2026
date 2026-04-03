@@ -1,0 +1,521 @@
+openapi: 3.0.3
+info:
+  title: Servicio Entrenamiento API
+  version: 1.0.0
+  description: |
+    Microservicio de planes de entrenamiento, rutinas, ejercicios y asignación por entrenadores.
+    Tecnología: Java 8 + Spring Boot 2.7.x
+
+servers:
+  - url: http://localhost:8083
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/training/plans:
+    post:
+      tags: [Planes]
+      summary: Crear plan de entrenamiento
+      operationId: createPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlanRequest'
+      responses:
+        '201':
+          description: Plan creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingPlanResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags: [Planes]
+      summary: Listar planes del usuario
+      operationId: listPlans
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, completed, paused]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de planes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/training/plans/{id}:
+    get:
+      tags: [Planes]
+      summary: Obtener detalle de plan
+      operationId: getPlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detalle del plan con rutinas y ejercicios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingPlanDetailResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Planes]
+      summary: Actualizar plan
+      operationId: updatePlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlanRequest'
+      responses:
+        '200':
+          description: Plan actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingPlanResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Planes]
+      summary: Eliminar plan
+      operationId: deletePlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Plan eliminado
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/training/plans/{id}/assign:
+    post:
+      tags: [Planes]
+      summary: Asignar plan a un cliente (entrenador)
+      operationId: assignPlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignPlanRequest'
+      responses:
+        '200':
+          description: Plan asignado exitosamente
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/training/exercises:
+    get:
+      tags: [Ejercicios]
+      summary: Catálogo de ejercicios
+      operationId: listExercises
+      parameters:
+        - name: muscleGroup
+          in: query
+          schema:
+            type: string
+        - name: difficulty
+          in: query
+          schema:
+            type: string
+            enum: [beginner, intermediate, advanced]
+        - name: equipmentRequired
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Lista de ejercicios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/training/routines:
+    post:
+      tags: [Rutinas]
+      summary: Crear rutina
+      operationId: createRoutine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoutineRequest'
+      responses:
+        '201':
+          description: Rutina creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutineResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags: [Rutinas]
+      summary: Listar rutinas
+      operationId: listRoutines
+      parameters:
+        - name: planId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de rutinas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoutineResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    CreatePlanRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        userId:
+          type: string
+          format: uuid
+
+    UpdatePlanRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, paused]
+
+    AssignPlanRequest:
+      type: object
+      required: [clientId]
+      properties:
+        clientId:
+          type: string
+          format: uuid
+
+    TrainingPlanResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        trainerId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        aiGenerated:
+          type: boolean
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    TrainingPlanDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/TrainingPlanResponse'
+        - type: object
+          properties:
+            routines:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoutineResponse'
+
+    PlanListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrainingPlanResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    CreateRoutineRequest:
+      type: object
+      required: [planId, name]
+      properties:
+        planId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        dayOfWeek:
+          type: integer
+          minimum: 0
+          maximum: 6
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutineExerciseRequest'
+
+    RoutineExerciseRequest:
+      type: object
+      required: [exerciseId, sets]
+      properties:
+        exerciseId:
+          type: string
+          format: uuid
+        sets:
+          type: integer
+        reps:
+          type: string
+        restSeconds:
+          type: integer
+        sortOrder:
+          type: integer
+
+    RoutineResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        planId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        dayOfWeek:
+          type: integer
+        sortOrder:
+          type: integer
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutineExerciseResponse'
+
+    RoutineExerciseResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        exercise:
+          $ref: '#/components/schemas/ExerciseResponse'
+        sets:
+          type: integer
+        reps:
+          type: string
+        restSeconds:
+          type: integer
+        sortOrder:
+          type: integer
+
+    ExerciseResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        muscleGroups:
+          type: array
+          items:
+            type: string
+        equipmentRequired:
+          type: array
+          items:
+            type: string
+        difficulty:
+          type: string
+        videoUrl:
+          type: string
+        instructions:
+          type: string
+
+    ExerciseListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

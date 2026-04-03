@@ -27,8 +27,16 @@ const LANGUAGES = [
 
 export default function LanguageSettingsPage() {
   const { t } = useTranslation('settings');
-  const { locale, changeLocale, formatDate, formatCurrency, formatWeight, formatDistance } =
-    useLocale();
+  const {
+    locale,
+    changeLocale,
+    formatDate,
+    formatTime,
+    formatCurrency,
+    formatNumber,
+    formatWeight,
+    formatDistance,
+  } = useLocale();
   const dispatch = useAppDispatch();
   const measurementUnit = useAppSelector((state) => state.ui.measurementUnit);
 
@@ -55,6 +63,7 @@ export default function LanguageSettingsPage() {
                   value={locale}
                   label={t('language')}
                   onChange={(e) => changeLocale(e.target.value)}
+                  aria-label={t('selectLanguage')}
                 >
                   {LANGUAGES.map(({ code, label }) => (
                     <MenuItem key={code} value={code}>
@@ -80,9 +89,18 @@ export default function LanguageSettingsPage() {
                   onChange={(e) =>
                     dispatch(setMeasurementUnit(e.target.value as 'metric' | 'imperial'))
                   }
+                  aria-label={t('measurementUnits')}
                 >
-                  <FormControlLabel value="metric" control={<Radio />} label={t('metric')} />
-                  <FormControlLabel value="imperial" control={<Radio />} label={t('imperial')} />
+                  <FormControlLabel
+                    value="metric"
+                    control={<Radio aria-label={t('metric')} />}
+                    label={t('metric')}
+                  />
+                  <FormControlLabel
+                    value="imperial"
+                    control={<Radio aria-label={t('imperial')} />}
+                    label={t('imperial')}
+                  />
                 </RadioGroup>
               </FormControl>
             </CardContent>
@@ -105,9 +123,21 @@ export default function LanguageSettingsPage() {
                 </Box>
                 <Box>
                   <Typography variant="body2" color="text.secondary">
+                    {t('timeFormat')}
+                  </Typography>
+                  <Typography variant="body1">{formatTime(sampleDate)}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
                     {t('currencyFormat')}
                   </Typography>
                   <Typography variant="body1">{formatCurrency(99.99, 'USD')}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('numberFormat')}
+                  </Typography>
+                  <Typography variant="body1">{formatNumber(1234567.89)}</Typography>
                 </Box>
                 <Box>
                   <Typography variant="body2" color="text.secondary">

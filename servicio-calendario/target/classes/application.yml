@@ -12,3 +12,8 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: servicio-calendario
+      auto-offset-reset: earliest

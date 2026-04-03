@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spartan-gym-${ENVIRONMENT}
+  labels:
+    app.kubernetes.io/part-of: spartan-golden-gym
+    environment: ${ENVIRONMENT}

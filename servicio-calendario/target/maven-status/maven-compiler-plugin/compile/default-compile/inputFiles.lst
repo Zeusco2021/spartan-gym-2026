@@ -1,1 +1,16 @@
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\sync\GoogleCalendarProvider.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\dto\EventResponse.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\dto\UpdateEventRequest.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\repository\CalendarEventRepository.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\sync\ExternalCalendarProvider.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\entity\CalendarEvent.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\sync\OutlookCalendarProvider.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\consumer\BookingEventConsumer.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\dto\CreateEventRequest.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\dto\SyncRequest.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\dto\SyncResponse.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\service\CalendarService.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\controller\CalendarController.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\dto\ConflictResponse.java
 D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\ServicioCalendarioApplication.java
+D:\Kiro Projects\SpartanGym\servicio-calendario\src\main\java\com\spartangoldengym\calendario\sync\AppleCalendarProvider.java

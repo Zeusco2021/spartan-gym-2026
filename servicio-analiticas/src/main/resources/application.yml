@@ -6,3 +6,35 @@ spring:
     name: servicio-analiticas
   kafka:
     bootstrap-servers: localhost:9092
+    consumer:
+      group-id: analytics-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    streams:
+      application-id: analytics-streams
+      bootstrap-servers: ${spring.kafka.bootstrap-servers}
+      properties:
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        state.dir: ${java.io.tmpdir}/kafka-streams/analytics
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+redshift:
+  url: ${REDSHIFT_URL:jdbc:postgresql://localhost:5439/analytics}
+  username: ${REDSHIFT_USERNAME:admin}
+  password: ${REDSHIFT_PASSWORD:admin}
+  driver-class-name: org.postgresql.Driver
+
+analytics:
+  admin-emails: ${ADMIN_EMAILS:admin@spartangoldengym.com}

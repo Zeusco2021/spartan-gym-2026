@@ -136,6 +136,7 @@ export default function LoginPage() {
               size="large"
               disabled={isLoading}
               sx={{ mt: 3, mb: 2 }}
+              aria-label={t('login')}
             >
               {isLoading ? <CircularProgress size={24} /> : t('login')}
             </Button>
@@ -144,7 +145,7 @@ export default function LoginPage() {
           <Box sx={{ textAlign: 'center', mt: 2 }}>
             <Typography variant="body2">
               {t('noAccount')}{' '}
-              <Link component={RouterLink} to="/register">
+              <Link component={RouterLink} to="/register" aria-label={t('registerLink')}>
                 {t('registerLink')}
               </Link>
             </Typography>

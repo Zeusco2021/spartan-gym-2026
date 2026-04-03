@@ -1,1 +1,13 @@
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\repository\MessageRepository.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\controller\MessageController.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\controller\ChatWebSocketHandler.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\dto\SendMessageRequest.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\service\MessageService.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\dto\MessageResponse.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\dto\ConversationResponse.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\model\Conversation.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\repository\InMemoryMessageRepository.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\model\Message.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\service\MessageEncryptionService.java
 D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\ServicioMensajeriaApplication.java
+D:\Kiro Projects\SpartanGym\servicio-mensajeria\src\main\java\com\spartangoldengym\mensajeria\config\WebSocketConfig.java

@@ -128,6 +128,7 @@ export default function MfaPage() {
               size="large"
               disabled={isLoading}
               sx={{ mt: 3, mb: 2 }}
+              aria-label={t('mfaVerify')}
             >
               {isLoading ? <CircularProgress size={24} /> : t('mfaVerify')}
             </Button>
@@ -135,7 +136,7 @@ export default function MfaPage() {
 
           <Box sx={{ textAlign: 'center', mt: 2 }}>
             <Typography variant="body2">
-              <Link component={RouterLink} to="/login">
+              <Link component={RouterLink} to="/login" aria-label={t('mfaBackToLogin')}>
                 {t('mfaBackToLogin')}
               </Link>
             </Typography>

@@ -11,6 +11,7 @@ com\spartangoldengym\entrenamiento\repository\RoutineExerciseRepository.class
 com\spartangoldengym\entrenamiento\dto\TrainingPlanResponse.class
 com\spartangoldengym\entrenamiento\dto\AssignPlanRequest.class
 com\spartangoldengym\entrenamiento\dto\CreateRoutineRequest.class
+com\spartangoldengym\entrenamiento\controller\MediaController.class
 com\spartangoldengym\entrenamiento\dto\CreateTrainingPlanRequest.class
 com\spartangoldengym\entrenamiento\service\RoutineService.class
 com\spartangoldengym\entrenamiento\entity\Routine.class

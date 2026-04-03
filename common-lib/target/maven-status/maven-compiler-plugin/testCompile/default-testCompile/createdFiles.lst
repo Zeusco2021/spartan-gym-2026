@@ -1,5 +1,7 @@
-com\spartangoldengym\common\exception\GlobalExceptionHandlerTest.class
-com\spartangoldengym\common\config\DynamoDbTablesTest.class
 com\spartangoldengym\common\config\KafkaTopicConfigTest.class
 com\spartangoldengym\common\config\TimestreamConfigTest.class
 com\spartangoldengym\common\config\NeptuneSchemaTest.class
+com\spartangoldengym\common\exception\GlobalExceptionHandlerTest.class
+com\spartangoldengym\common\service\MultimediaStorageServiceTest.class
+com\spartangoldengym\common\config\DynamoDbTablesTest.class
+com\spartangoldengym\common\kafka\KafkaEventPublishingProperties.class

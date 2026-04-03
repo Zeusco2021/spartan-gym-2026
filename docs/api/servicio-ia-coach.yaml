@@ -1,0 +1,452 @@
+openapi: 3.0.3
+info:
+  title: Servicio IA Coach API
+  version: 1.0.0
+  description: |
+    Microservicio de generación de planes personalizados, recomendaciones de ejercicios,
+    detección de sobreentrenamiento y predicción de adherencia.
+    Tecnología: Java 8 + Spring Boot 2.7.x + SageMaker Endpoints
+
+servers:
+  - url: http://localhost:8086
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/ai/plans/generate:
+    post:
+      tags: [Planes IA]
+      summary: Generar plan de entrenamiento personalizado con IA
+      operationId: generatePlan
+      description: |
+        Genera un plan personalizado considerando nivel de fitness, objetivos,
+        condiciones médicas y equipamiento disponible. Respuesta en máximo 5 segundos.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeneratePlanRequest'
+      responses:
+        '200':
+          description: Plan generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneratedPlanResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /api/ai/recommendations:
+    post:
+      tags: [Recomendaciones]
+      summary: Obtener recomendación de ejercicio
+      operationId: getRecommendation
+      description: Respuesta en máximo 500ms. Publica evento en Kafka ai.recommendations.request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationRequest'
+      responses:
+        '200':
+          description: Recomendación generada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /api/ai/overtraining/check:
+    post:
+      tags: [Sobreentrenamiento]
+      summary: Verificar indicadores de sobreentrenamiento
+      operationId: checkOvertraining
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OvertrainingCheckRequest'
+      responses:
+        '200':
+          description: Resultado del análisis de sobreentrenamiento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OvertrainingCheckResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/ai/alternatives:
+    post:
+      tags: [Recomendaciones]
+      summary: Obtener ejercicios alternativos
+      operationId: getAlternatives
+      description: Sugiere ejercicios que trabajan los mismos grupos musculares cuando el equipo no está disponible.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlternativesRequest'
+      responses:
+        '200':
+          description: Ejercicios alternativos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlternativesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/ai/warmup:
+    post:
+      tags: [Recomendaciones]
+      summary: Recomendación de calentamiento
+      operationId: getWarmup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarmupRequest'
+      responses:
+        '200':
+          description: Rutina de calentamiento recomendada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarmupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/ai/adherence/predict:
+    post:
+      tags: [Predicción]
+      summary: Predicción de adherencia al plan
+      operationId: predictAdherence
+      description: Modelo ML con precisión superior al 85%.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdherencePredictRequest'
+      responses:
+        '200':
+          description: Predicción de adherencia
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdherencePredictResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    GeneratePlanRequest:
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        fitnessLevel:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        goals:
+          type: array
+          items:
+            type: string
+        medicalConditions:
+          type: array
+          items:
+            type: string
+        availableEquipment:
+          type: array
+          items:
+            type: string
+        trainingDaysPerWeek:
+          type: integer
+          minimum: 1
+          maximum: 7
+        sessionDurationMinutes:
+          type: integer
+
+    GeneratedPlanResponse:
+      type: object
+      properties:
+        planId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        aiGenerated:
+          type: boolean
+          default: true
+        routines:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeneratedRoutine'
+        warnings:
+          type: array
+          items:
+            type: string
+          description: Advertencias por condiciones médicas
+
+    GeneratedRoutine:
+      type: object
+      properties:
+        name:
+          type: string
+        dayOfWeek:
+          type: integer
+        warmup:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseRecommendation'
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseRecommendation'
+
+    ExerciseRecommendation:
+      type: object
+      properties:
+        exerciseId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        muscleGroups:
+          type: array
+          items:
+            type: string
+        sets:
+          type: integer
+        reps:
+          type: string
+        restSeconds:
+          type: integer
+        notes:
+          type: string
+
+    RecommendationRequest:
+      type: object
+      required: [userId, context]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        context:
+          type: string
+          enum: [next_exercise, rest_day, progression]
+        currentExerciseId:
+          type: string
+          format: uuid
+
+    RecommendationResponse:
+      type: object
+      properties:
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseRecommendation'
+        reasoning:
+          type: string
+
+    OvertrainingCheckRequest:
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        restingHeartRate:
+          type: integer
+        heartRateVariability:
+          type: number
+          format: double
+        sleepQuality:
+          type: number
+          format: double
+        performanceTrend:
+          type: string
+          enum: [improving, stable, declining]
+
+    OvertrainingCheckResponse:
+      type: object
+      properties:
+        overtrainingDetected:
+          type: boolean
+        riskLevel:
+          type: string
+          enum: [low, moderate, high]
+        indicators:
+          type: array
+          items:
+            type: string
+        recommendation:
+          type: string
+        suggestedRestDays:
+          type: integer
+
+    AlternativesRequest:
+      type: object
+      required: [exerciseId]
+      properties:
+        exerciseId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum: [equipment_unavailable, injury, preference]
+        availableEquipment:
+          type: array
+          items:
+            type: string
+
+    AlternativesResponse:
+      type: object
+      properties:
+        originalExercise:
+          type: string
+        targetMuscleGroups:
+          type: array
+          items:
+            type: string
+        alternatives:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseRecommendation'
+
+    WarmupRequest:
+      type: object
+      required: [plannedExercises]
+      properties:
+        plannedExercises:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    WarmupResponse:
+      type: object
+      properties:
+        warmupRecommended:
+          type: boolean
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseRecommendation'
+        durationMinutes:
+          type: integer
+
+    AdherencePredictRequest:
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        planId:
+          type: string
+          format: uuid
+
+    AdherencePredictResponse:
+      type: object
+      properties:
+        adherenceProbability:
+          type: number
+          format: double
+          description: Probabilidad de completar el plan (0.0 - 1.0)
+        riskFactors:
+          type: array
+          items:
+            type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Servicio ML no disponible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

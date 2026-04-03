@@ -29,7 +29,7 @@ export default function SupplementsPage() {
 
       {isLoading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress />
+          <CircularProgress aria-label={t('loading')} />
         </Box>
       )}
 
@@ -40,12 +40,11 @@ export default function SupplementsPage() {
       )}
 
       {data && data.length > 0 && (
-        <Grid container spacing={3}>
+        <Grid container spacing={3} aria-label={t('supplementsTitle')}>
           {data.map((supp) => (
             <Grid key={supp.id} size={{ xs: 12, md: 6 }}>
-              <Card>
+              <Card aria-label={supp.name}>
                 <CardContent>
-
                   <Typography variant="h6">{supp.name}</Typography>
                   <Chip label={supp.category} size="small" sx={{ mb: 1 }} />
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>

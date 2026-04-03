@@ -10,6 +10,7 @@ D:\Kiro Projects\SpartanGym\servicio-entrenamiento\src\main\java\com\spartangold
 D:\Kiro Projects\SpartanGym\servicio-entrenamiento\src\main\java\com\spartangoldengym\entrenamiento\ServicioEntrenamientoApplication.java
 D:\Kiro Projects\SpartanGym\servicio-entrenamiento\src\main\java\com\spartangoldengym\entrenamiento\entity\RoutineExercise.java
 D:\Kiro Projects\SpartanGym\servicio-entrenamiento\src\main\java\com\spartangoldengym\entrenamiento\repository\TrainingPlanRepository.java
+D:\Kiro Projects\SpartanGym\servicio-entrenamiento\src\main\java\com\spartangoldengym\entrenamiento\controller\MediaController.java
 D:\Kiro Projects\SpartanGym\servicio-entrenamiento\src\main\java\com\spartangoldengym\entrenamiento\dto\CreateTrainingPlanRequest.java
 D:\Kiro Projects\SpartanGym\servicio-entrenamiento\src\main\java\com\spartangoldengym\entrenamiento\entity\Exercise.java
 D:\Kiro Projects\SpartanGym\servicio-entrenamiento\src\main\java\com\spartangoldengym\entrenamiento\repository\RoutineRepository.java

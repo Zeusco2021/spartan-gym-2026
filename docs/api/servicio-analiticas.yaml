@@ -1,0 +1,280 @@
+openapi: 3.0.3
+info:
+  title: Servicio Analíticas API
+  version: 1.0.0
+  description: |
+    Microservicio de métricas de negocio, dashboards y reportes automáticos.
+    Tecnología: Java 8 + Spring Boot 2.7.x + Amazon Redshift
+
+servers:
+  - url: http://localhost:8093
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/analytics/dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Datos del dashboard de analíticas
+      operationId: getDashboard
+      parameters:
+        - name: gymId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Datos del dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/analytics/reports:
+    get:
+      tags: [Reportes]
+      summary: Reportes generados
+      operationId: getReports
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [weekly, monthly, custom]
+        - name: gymId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Lista de reportes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/analytics/metrics:
+    get:
+      tags: [Métricas]
+      summary: Métricas en tiempo real
+      operationId: getMetrics
+      parameters:
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+        - name: metric
+          in: query
+          schema:
+            type: string
+            enum: [latency, throughput, error_rate, cpu, memory]
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [1h, 6h, 24h, 7d, 30d]
+            default: 24h
+      responses:
+        '200':
+          description: Métricas del sistema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    DashboardResponse:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        activeUsers:
+          type: integer
+        newUsersThisPeriod:
+          type: integer
+        retentionRate:
+          type: number
+          format: double
+        averageWorkoutsPerUser:
+          type: number
+          format: double
+        totalRevenue:
+          type: number
+          format: double
+        averageOccupancy:
+          type: number
+          format: double
+        topExercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopItem'
+        revenueByPlan:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+
+    TopItem:
+      type: object
+      properties:
+        name:
+          type: string
+        count:
+          type: integer
+
+    ReportResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        period:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        downloadUrl:
+          type: string
+        summary:
+          $ref: '#/components/schemas/ReportSummary'
+
+    ReportSummary:
+      type: object
+      properties:
+        totalWorkouts:
+          type: integer
+        totalRevenue:
+          type: number
+          format: double
+        newMembers:
+          type: integer
+        churnRate:
+          type: number
+          format: double
+        averageSessionDuration:
+          type: integer
+
+    MetricsResponse:
+      type: object
+      properties:
+        serviceId:
+          type: string
+        metric:
+          type: string
+        period:
+          type: string
+        dataPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricDataPoint'
+        average:
+          type: number
+          format: double
+        p95:
+          type: number
+          format: double
+        p99:
+          type: number
+          format: double
+
+    MetricDataPoint:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        value:
+          type: number
+          format: double
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: No autorizado - Solo administradores
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

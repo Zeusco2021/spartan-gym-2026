@@ -6,11 +6,13 @@ import 'video.js/dist/video-js.css';
 interface VideoPlayerProps {
   src: string;
   type?: string;
+  ariaLabel?: string;
 }
 
 export default function VideoPlayer({
   src,
   type = 'application/x-mpegURL',
+  ariaLabel,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
@@ -41,5 +43,12 @@ export default function VideoPlayer({
     };
   }, [src, type]);
 
-  return <div data-vjs-player ref={videoRef} />;
+  return (
+    <div
+      data-vjs-player
+      ref={videoRef}
+      role="region"
+      aria-label={ariaLabel ?? 'Video player'}
+    />
+  );
 }

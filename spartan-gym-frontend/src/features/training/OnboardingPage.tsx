@@ -300,18 +300,19 @@ export default function OnboardingPage() {
       </Card>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-        <Button disabled={activeStep === 0} onClick={handleBack}>
+        <Button disabled={activeStep === 0} onClick={handleBack} aria-label={t('onboarding.back')}>
           {t('onboarding.back')}
         </Button>
         <Box sx={{ display: 'flex', gap: 1 }}>
           {isOptionalStep(activeStep) && (
-            <Button onClick={handleSkip}>{t('onboarding.skip')}</Button>
+            <Button onClick={handleSkip} aria-label={t('onboarding.skip')}>{t('onboarding.skip')}</Button>
           )}
           {activeStep === steps.length - 1 ? (
             <Button
               variant="contained"
               onClick={handleComplete}
               disabled={!canProceed() || isSubmitting || isGenerating}
+              aria-label={t('onboarding.complete')}
             >
               {isSubmitting || isGenerating ? (
                 <CircularProgress size={24} />
@@ -324,6 +325,7 @@ export default function OnboardingPage() {
               variant="contained"
               onClick={handleNext}
               disabled={!canProceed()}
+              aria-label={t('onboarding.next')}
             >
               {t('onboarding.next')}
             </Button>

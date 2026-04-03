@@ -1,0 +1,477 @@
+openapi: 3.0.3
+info:
+  title: Servicio Nutrición API
+  version: 1.0.0
+  description: |
+    Microservicio de planes nutricionales, base de datos de alimentos, seguimiento de macros y recetas.
+    Tecnología: Java 8 + Spring Boot 2.7.x
+
+servers:
+  - url: http://localhost:8085
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/nutrition/plans:
+    post:
+      tags: [Planes Nutricionales]
+      summary: Crear plan nutricional
+      operationId: createNutritionPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNutritionPlanRequest'
+      responses:
+        '201':
+          description: Plan nutricional creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NutritionPlanResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags: [Planes Nutricionales]
+      summary: Listar planes nutricionales del usuario
+      operationId: listNutritionPlans
+      responses:
+        '200':
+          description: Lista de planes nutricionales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NutritionPlanResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/nutrition/meals:
+    post:
+      tags: [Comidas]
+      summary: Registrar comida
+      operationId: logMeal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogMealRequest'
+      responses:
+        '201':
+          description: Comida registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealLogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/nutrition/daily-balance:
+    get:
+      tags: [Balance]
+      summary: Balance diario de macronutrientes
+      operationId: getDailyBalance
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Balance diario de calorías y macros
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyBalanceResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/nutrition/foods:
+    get:
+      tags: [Alimentos]
+      summary: Buscar en base de datos de alimentos
+      operationId: searchFoods
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+        - name: region
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de alimentos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/nutrition/foods/barcode/{code}:
+    get:
+      tags: [Alimentos]
+      summary: Buscar alimento por código de barras
+      operationId: getFoodByBarcode
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Información nutricional del producto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/nutrition/recipes:
+    get:
+      tags: [Recetas]
+      summary: Recetas recomendadas
+      operationId: getRecipes
+      parameters:
+        - name: goal
+          in: query
+          schema:
+            type: string
+            enum: [weight_loss, muscle_gain, maintenance]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de recetas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecipeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/nutrition/supplements:
+    get:
+      tags: [Suplementos]
+      summary: Información de suplementos
+      operationId: getSupplements
+      responses:
+        '200':
+          description: Lista de suplementos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupplementResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    CreateNutritionPlanRequest:
+      type: object
+      required: [goal]
+      properties:
+        goal:
+          type: string
+          enum: [weight_loss, muscle_gain, maintenance]
+        dailyCalories:
+          type: integer
+        proteinGrams:
+          type: integer
+        carbsGrams:
+          type: integer
+        fatGrams:
+          type: integer
+
+    NutritionPlanResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        goal:
+          type: string
+        dailyCalories:
+          type: integer
+        proteinGrams:
+          type: integer
+        carbsGrams:
+          type: integer
+        fatGrams:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    LogMealRequest:
+      type: object
+      required: [foodId, quantityGrams, mealType]
+      properties:
+        foodId:
+          type: string
+          format: uuid
+        quantityGrams:
+          type: number
+          format: double
+        mealType:
+          type: string
+          enum: [breakfast, lunch, dinner, snack]
+
+    MealLogResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        foodId:
+          type: string
+          format: uuid
+        foodName:
+          type: string
+        quantityGrams:
+          type: number
+          format: double
+        mealType:
+          type: string
+        calories:
+          type: number
+          format: double
+        protein:
+          type: number
+          format: double
+        carbs:
+          type: number
+          format: double
+        fat:
+          type: number
+          format: double
+        loggedAt:
+          type: string
+          format: date-time
+
+    DailyBalanceResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        targetCalories:
+          type: integer
+        consumedCalories:
+          type: number
+          format: double
+        remainingCalories:
+          type: number
+          format: double
+        protein:
+          $ref: '#/components/schemas/MacroBalance'
+        carbs:
+          $ref: '#/components/schemas/MacroBalance'
+        fat:
+          $ref: '#/components/schemas/MacroBalance'
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealLogResponse'
+
+    MacroBalance:
+      type: object
+      properties:
+        targetGrams:
+          type: integer
+        consumedGrams:
+          type: number
+          format: double
+        remainingGrams:
+          type: number
+          format: double
+
+    FoodResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        barcode:
+          type: string
+        caloriesPer100g:
+          type: number
+          format: double
+        proteinPer100g:
+          type: number
+          format: double
+        carbsPer100g:
+          type: number
+          format: double
+        fatPer100g:
+          type: number
+          format: double
+        micronutrients:
+          type: object
+        region:
+          type: string
+
+    FoodListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    RecipeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        calories:
+          type: integer
+        protein:
+          type: integer
+        carbs:
+          type: integer
+        fat:
+          type: integer
+        ingredients:
+          type: array
+          items:
+            type: string
+        instructions:
+          type: string
+        prepTimeMinutes:
+          type: integer
+
+    SupplementResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+        dosage:
+          type: string
+        benefits:
+          type: string
+        warnings:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

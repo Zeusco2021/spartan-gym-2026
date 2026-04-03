@@ -1,0 +1,161 @@
+name: CI - Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  JAVA_VERSION: '8'
+  NODE_VERSION: '18'
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Backend: Build & test all microservices
+  # ──────────────────────────────────────────────
+  backend-build:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'corretto'
+          cache: 'maven'
+
+      - name: Build & test all modules
+        run: mvn clean verify -B
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: '**/target/surefire-reports/**'
+
+  # ──────────────────────────────────────────────
+  # Frontend Web: Build, test & accessibility audit
+  # ──────────────────────────────────────────────
+  frontend-web-build:
+    name: Frontend Web Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spartan-gym-frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: spartan-gym-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Unit tests
+        run: npm test -- --run --passWithNoTests
+
+      - name: Build
+        run: npm run build
+
+      - name: Accessibility audit (axe-core)
+        run: |
+          npx serve -s dist -l 3000 &
+          sleep 5
+          npx @axe-core/cli http://localhost:3000 --exit --tags wcag2a,wcag2aa || true
+
+      - name: Upload web build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-web-dist
+          path: spartan-gym-frontend/dist
+
+  # ──────────────────────────────────────────────
+  # Frontend Mobile: Build & accessibility audit
+  # ──────────────────────────────────────────────
+  frontend-mobile-build:
+    name: Frontend Mobile Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: spartan-gym-mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: spartan-gym-mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Unit tests
+        run: npm test -- --run --passWithNoTests
+
+  # ──────────────────────────────────────────────
+  # Docker images: Build for each microservice
+  # ──────────────────────────────────────────────
+  docker-build:
+    name: Docker Build - ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: backend-build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - servicio-usuarios
+          - servicio-gimnasio
+          - servicio-entrenamiento
+          - servicio-seguimiento
+          - servicio-nutricion
+          - servicio-ia-coach
+          - servicio-social
+          - servicio-pagos
+          - servicio-analiticas
+          - servicio-notificaciones
+          - servicio-reservas
+          - servicio-mensajeria
+          - servicio-calendario
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            --build-arg MODULE=${{ matrix.service }} \
+            -t $ECR_REGISTRY/spartan-gym/${{ matrix.service }}:$IMAGE_TAG \
+            -t $ECR_REGISTRY/spartan-gym/${{ matrix.service }}:latest \
+            .
+          docker push $ECR_REGISTRY/spartan-gym/${{ matrix.service }}:$IMAGE_TAG
+          docker push $ECR_REGISTRY/spartan-gym/${{ matrix.service }}:latest

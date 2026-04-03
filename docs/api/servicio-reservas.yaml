@@ -1,0 +1,423 @@
+openapi: 3.0.3
+info:
+  title: Servicio Reservas API
+  version: 1.0.0
+  description: |
+    Microservicio de clases grupales, listas de espera y disponibilidad de entrenadores.
+    Tecnología: Java 8 + Spring Boot 2.7.x
+
+servers:
+  - url: http://localhost:8090
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/bookings/classes:
+    get:
+      tags: [Clases]
+      summary: Listar clases disponibles
+      operationId: listClasses
+      parameters:
+        - name: gymId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: instructorId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: difficultyLevel
+          in: query
+          schema:
+            type: string
+            enum: [beginner, intermediate, advanced]
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Lista de clases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupClassResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Clases]
+      summary: Crear clase grupal (admin/instructor)
+      operationId: createClass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClassRequest'
+      responses:
+        '201':
+          description: Clase creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupClassResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/bookings/classes/{id}/reserve:
+    post:
+      tags: [Reservas]
+      summary: Reservar clase
+      operationId: reserveClass
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Reserva confirmada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Clase llena - usuario agregado a lista de espera
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaitlistResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/bookings/classes/{id}/cancel:
+    post:
+      tags: [Reservas]
+      summary: Cancelar reserva
+      operationId: cancelReservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+      responses:
+        '200':
+          description: Reserva cancelada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/bookings/trainers/{id}/availability:
+    get:
+      tags: [Entrenadores]
+      summary: Obtener disponibilidad del entrenador
+      operationId: getTrainerAvailability
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Disponibilidad del entrenador
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailabilitySlot'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Entrenadores]
+      summary: Actualizar disponibilidad del entrenador
+      operationId: updateTrainerAvailability
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AvailabilitySlot'
+      responses:
+        '200':
+          description: Disponibilidad actualizada
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/bookings/waitlist/{classId}:
+    get:
+      tags: [Lista de Espera]
+      summary: Estado de lista de espera de una clase
+      operationId: getWaitlist
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de espera
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaitlistStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    CreateClassRequest:
+      type: object
+      required: [gymId, instructorId, name, maxCapacity, scheduledAt, durationMinutes]
+      properties:
+        gymId:
+          type: string
+          format: uuid
+        instructorId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        room:
+          type: string
+        maxCapacity:
+          type: integer
+        difficultyLevel:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        scheduledAt:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+
+    GroupClassResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        gymId:
+          type: string
+          format: uuid
+        instructorId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        room:
+          type: string
+        maxCapacity:
+          type: integer
+        currentCapacity:
+          type: integer
+        availableSpots:
+          type: integer
+        difficultyLevel:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        durationMinutes:
+          type: integer
+
+    ReservationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        classId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [confirmed, cancelled]
+        reservedAt:
+          type: string
+          format: date-time
+
+    WaitlistResponse:
+      type: object
+      properties:
+        classId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        position:
+          type: integer
+        addedAt:
+          type: string
+          format: date-time
+
+    WaitlistStatusResponse:
+      type: object
+      properties:
+        classId:
+          type: string
+          format: uuid
+        totalWaiting:
+          type: integer
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/WaitlistResponse'
+
+    CancelRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+
+    CancelResponse:
+      type: object
+      properties:
+        reservationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        penaltyApplied:
+          type: boolean
+          description: Penalización si cancela con menos de 2 horas de anticipación
+
+    AvailabilitySlot:
+      type: object
+      required: [dayOfWeek, startTime, endTime]
+      properties:
+        id:
+          type: string
+          format: uuid
+        dayOfWeek:
+          type: integer
+          minimum: 0
+          maximum: 6
+        startTime:
+          type: string
+          format: time
+        endTime:
+          type: string
+          format: time
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

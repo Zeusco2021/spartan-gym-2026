@@ -1,0 +1,473 @@
+openapi: 3.0.3
+info:
+  title: Servicio Usuarios API
+  version: 1.0.0
+  description: |
+    Microservicio de gestión de usuarios, autenticación, perfiles, roles y cumplimiento GDPR/LGPD.
+    Tecnología: Java 8 + Spring Boot 2.7.x
+  contact:
+    name: Spartan Golden Gym Dev Team
+
+servers:
+  - url: http://localhost:8081
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/users/register:
+    post:
+      tags: [Autenticación]
+      summary: Registrar nuevo usuario
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/users/login:
+    post:
+      tags: [Autenticación]
+      summary: Iniciar sesión
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Cuenta bloqueada por intentos fallidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/users/profile:
+    get:
+      tags: [Perfil]
+      summary: Obtener perfil del usuario autenticado
+      operationId: getProfile
+      responses:
+        '200':
+          description: Perfil del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Perfil]
+      summary: Actualizar perfil del usuario
+      operationId: updateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/users/profile/delete:
+    delete:
+      tags: [Perfil]
+      summary: Solicitar eliminación de cuenta (GDPR)
+      operationId: deleteProfile
+      responses:
+        '202':
+          description: Solicitud de eliminación aceptada (procesamiento en hasta 30 días)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/users/data-export:
+    post:
+      tags: [GDPR]
+      summary: Solicitar exportación de datos personales (portabilidad)
+      operationId: exportData
+      responses:
+        '202':
+          description: Solicitud de exportación aceptada (disponible en hasta 72 horas)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/users/mfa/setup:
+    post:
+      tags: [Seguridad]
+      summary: Configurar autenticación multifactor (MFA)
+      operationId: setupMfa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaSetupRequest'
+      responses:
+        '200':
+          description: MFA configurado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaSetupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/users/onboarding:
+    get:
+      tags: [Onboarding]
+      summary: Obtener estado del onboarding del usuario
+      operationId: getOnboarding
+      responses:
+        '200':
+          description: Estado del onboarding
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Onboarding]
+      summary: Enviar datos de evaluación inicial
+      operationId: submitOnboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingRequest'
+      responses:
+        '200':
+          description: Onboarding completado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingStatus'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password, dateOfBirth]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        dateOfBirth:
+          type: string
+          format: date
+        role:
+          type: string
+          enum: [client, trainer, admin]
+          default: client
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        mfaCode:
+          type: string
+          description: Código MFA si está habilitado
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [client, trainer, admin]
+        mfaEnabled:
+          type: boolean
+        onboardingCompleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        role:
+          type: string
+        locale:
+          type: string
+        profilePhotoUrl:
+          type: string
+        fitnessGoals:
+          type: object
+        medicalConditions:
+          type: object
+        mfaEnabled:
+          type: boolean
+        onboardingCompleted:
+          type: boolean
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        profilePhotoUrl:
+          type: string
+        fitnessGoals:
+          type: object
+        medicalConditions:
+          type: object
+        locale:
+          type: string
+
+    MfaSetupRequest:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [totp, sms]
+
+    MfaSetupResponse:
+      type: object
+      properties:
+        secret:
+          type: string
+        qrCodeUrl:
+          type: string
+        backupCodes:
+          type: array
+          items:
+            type: string
+
+    OnboardingStatus:
+      type: object
+      properties:
+        completed:
+          type: boolean
+        currentStep:
+          type: integer
+        totalSteps:
+          type: integer
+        fitnessLevel:
+          type: string
+        goals:
+          type: array
+          items:
+            type: string
+
+    OnboardingRequest:
+      type: object
+      properties:
+        fitnessLevel:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        goals:
+          type: array
+          items:
+            type: string
+            enum: [weight_loss, muscle_gain, endurance, flexibility]
+        trainingFrequency:
+          type: integer
+          minimum: 1
+          maximum: 7
+        medicalConditions:
+          type: array
+          items:
+            type: string
+        bodyMeasurements:
+          $ref: '#/components/schemas/BodyMeasurements'
+
+    BodyMeasurements:
+      type: object
+      properties:
+        weight:
+          type: number
+          format: double
+        height:
+          type: number
+          format: double
+        waist:
+          type: number
+          format: double
+        chest:
+          type: number
+          format: double
+        arms:
+          type: number
+          format: double
+        legs:
+          type: number
+          format: double
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflicto (ej. email duplicado)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyRequests:
+      description: Límite de solicitudes excedido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Servicio no disponible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

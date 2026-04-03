@@ -1,0 +1,405 @@
+openapi: 3.0.3
+info:
+  title: Servicio Social API
+  version: 1.0.0
+  description: |
+    Microservicio de comunidad, desafíos, rankings, logros e interacciones sociales.
+    Tecnología: Java 8 + Spring Boot 2.7.x + Amazon Neptune
+
+servers:
+  - url: http://localhost:8087
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/social/challenges:
+    post:
+      tags: [Desafíos]
+      summary: Crear desafío
+      operationId: createChallenge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChallengeRequest'
+      responses:
+        '201':
+          description: Desafío creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags: [Desafíos]
+      summary: Listar desafíos
+      operationId: listChallenges
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, completed, upcoming]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de desafíos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChallengeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/social/achievements:
+    get:
+      tags: [Logros]
+      summary: Logros del usuario
+      operationId: getAchievements
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de logros
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AchievementResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/social/rankings:
+    get:
+      tags: [Rankings]
+      summary: Rankings por categoría
+      operationId: getRankings
+      parameters:
+        - name: category
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [strength, endurance, consistency, nutrition]
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [weekly, monthly, all_time]
+            default: weekly
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Rankings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RankingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/social/share:
+    post:
+      tags: [Compartir]
+      summary: Compartir logro en redes sociales
+      operationId: shareAchievement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareRequest'
+      responses:
+        '200':
+          description: Contenido compartible generado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/social/groups:
+    post:
+      tags: [Grupos]
+      summary: Crear grupo de entrenamiento
+      operationId: createGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '201':
+          description: Grupo creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags: [Grupos]
+      summary: Listar grupos
+      operationId: listGroups
+      responses:
+        '200':
+          description: Lista de grupos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/social/interactions:
+    post:
+      tags: [Interacciones]
+      summary: Registrar interacción social
+      operationId: recordInteraction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InteractionRequest'
+      responses:
+        '201':
+          description: Interacción registrada
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    CreateChallengeRequest:
+      type: object
+      required: [name, type, goal, startsAt, endsAt]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [distance, weight_lifted, workouts_completed]
+        goal:
+          type: number
+          format: double
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+
+    ChallengeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+        goal:
+          type: number
+          format: double
+        status:
+          type: string
+        participantCount:
+          type: integer
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+
+    AchievementResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        earnedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    RankingResponse:
+      type: object
+      properties:
+        category:
+          type: string
+        period:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingEntry'
+
+    RankingEntry:
+      type: object
+      properties:
+        position:
+          type: integer
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        score:
+          type: number
+          format: double
+
+    ShareRequest:
+      type: object
+      required: [achievementId, platform]
+      properties:
+        achievementId:
+          type: string
+        platform:
+          type: string
+          enum: [instagram, twitter, facebook]
+
+    ShareResponse:
+      type: object
+      properties:
+        imageUrl:
+          type: string
+        shareUrl:
+          type: string
+        message:
+          type: string
+
+    CreateGroupRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    GroupResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        memberCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    InteractionRequest:
+      type: object
+      required: [type, targetId]
+      properties:
+        type:
+          type: string
+          enum: [comment, reaction, share]
+        targetId:
+          type: string
+        content:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

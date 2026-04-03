@@ -153,7 +153,9 @@ export default function GymMapPage() {
                       boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
                       cursor: 'pointer',
                     }}
-                    aria-label={`${gym.name} - ${t('occupancy')}: ${t(level)}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${gym.name} - ${t('occupancy')}: ${occ}/${gym.maxCapacity} (${t(level)})`}
                   />
                 </Marker>
               );
@@ -217,6 +219,7 @@ function GymPopupContent({ gym, occupancy, onViewDetail }: GymPopupContentProps)
           variant="outlined"
           onClick={onViewDetail}
           sx={{ mt: 1, width: '100%' }}
+          aria-label={`${t('viewDetail')}: ${gym.name}`}
         >
           {t('viewDetail')}
         </Button>

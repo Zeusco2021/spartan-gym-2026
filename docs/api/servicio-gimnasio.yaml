@@ -1,0 +1,523 @@
+openapi: 3.0.3
+info:
+  title: Servicio Gimnasio API
+  version: 1.0.0
+  description: |
+    Microservicio de gestión de gimnasios, ubicaciones, equipamiento y ocupación.
+    Tecnología: Java 8 + Spring Boot 2.7.x
+
+servers:
+  - url: http://localhost:8082
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/gyms:
+    post:
+      tags: [Gimnasios]
+      summary: Crear nuevo gimnasio
+      operationId: createGym
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGymRequest'
+      responses:
+        '201':
+          description: Gimnasio creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GymResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags: [Gimnasios]
+      summary: Listar gimnasios
+      operationId: listGyms
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: chainId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de gimnasios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GymListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gyms/{id}:
+    get:
+      tags: [Gimnasios]
+      summary: Obtener detalle de gimnasio
+      operationId: getGym
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detalle del gimnasio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GymResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Gimnasios]
+      summary: Actualizar gimnasio
+      operationId: updateGym
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGymRequest'
+      responses:
+        '200':
+          description: Gimnasio actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GymResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gyms/nearby:
+    get:
+      tags: [Gimnasios]
+      summary: Buscar gimnasios cercanos por geolocalización
+      operationId: findNearbyGyms
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: radiusKm
+          in: query
+          schema:
+            type: number
+            format: double
+            default: 10
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Gimnasios cercanos ordenados por distancia
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NearbyGymResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gyms/{id}/checkin:
+    post:
+      tags: [Check-in]
+      summary: Check-in por código QR
+      operationId: checkin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckinRequest'
+      responses:
+        '200':
+          description: Check-in exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Membresía no activa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gyms/{id}/occupancy:
+    get:
+      tags: [Ocupación]
+      summary: Obtener ocupación actual del gimnasio
+      operationId: getOccupancy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ocupación actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OccupancyResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/gyms/{id}/equipment:
+    get:
+      tags: [Equipamiento]
+      summary: Obtener inventario de equipamiento
+      operationId: getEquipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de equipamiento
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EquipmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Equipamiento]
+      summary: Actualizar inventario de equipamiento
+      operationId: updateEquipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EquipmentRequest'
+      responses:
+        '200':
+          description: Equipamiento actualizado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EquipmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    CreateGymRequest:
+      type: object
+      required: [name, address, latitude, longitude, operatingHours, maxCapacity]
+      properties:
+        chainId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        operatingHours:
+          type: object
+          description: Horarios por día de la semana
+        maxCapacity:
+          type: integer
+
+    UpdateGymRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        operatingHours:
+          type: object
+        maxCapacity:
+          type: integer
+
+    GymResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        chainId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        address:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        operatingHours:
+          type: object
+        maxCapacity:
+          type: integer
+        currentOccupancy:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    GymListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/GymResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    NearbyGymResponse:
+      allOf:
+        - $ref: '#/components/schemas/GymResponse'
+        - type: object
+          properties:
+            distanceKm:
+              type: number
+              format: double
+
+    CheckinRequest:
+      type: object
+      required: [qrCode]
+      properties:
+        qrCode:
+          type: string
+
+    CheckinResponse:
+      type: object
+      properties:
+        checkinId:
+          type: string
+          format: uuid
+        gymId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        checkedInAt:
+          type: string
+          format: date-time
+
+    OccupancyResponse:
+      type: object
+      properties:
+        gymId:
+          type: string
+          format: uuid
+        currentOccupancy:
+          type: integer
+        maxCapacity:
+          type: integer
+        occupancyPercentage:
+          type: number
+          format: double
+
+    EquipmentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+        quantity:
+          type: integer
+        status:
+          type: string
+          enum: [available, maintenance, out_of_order]
+
+    EquipmentRequest:
+      type: object
+      required: [name, category, quantity]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+        quantity:
+          type: integer
+        status:
+          type: string
+          enum: [available, maintenance, out_of_order]
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

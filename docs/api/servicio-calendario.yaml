@@ -1,0 +1,349 @@
+openapi: 3.0.3
+info:
+  title: Servicio Calendario API
+  version: 1.0.0
+  description: |
+    Microservicio de consolidación de horarios y sincronización con calendarios externos
+    (Google Calendar, Apple Calendar, Outlook).
+    Tecnología: Java 8 + Spring Boot 2.7.x
+
+servers:
+  - url: http://localhost:8092
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/calendar/events:
+    get:
+      tags: [Eventos]
+      summary: Obtener eventos del usuario
+      operationId: getEvents
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: eventType
+          in: query
+          schema:
+            type: string
+            enum: [workout, class, trainer_session, nutrition_reminder, custom]
+      responses:
+        '200':
+          description: Lista de eventos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalendarEventResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags: [Eventos]
+      summary: Crear evento en el calendario
+      operationId: createEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Evento creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Conflicto de horario detectado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/calendar/events/{id}:
+    put:
+      tags: [Eventos]
+      summary: Modificar evento
+      operationId: updateEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEventRequest'
+      responses:
+        '200':
+          description: Evento actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags: [Eventos]
+      summary: Eliminar evento
+      operationId: deleteEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Evento eliminado
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/calendar/sync:
+    post:
+      tags: [Sincronización]
+      summary: Sincronizar con calendario externo
+      operationId: syncCalendar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncCalendarRequest'
+      responses:
+        '200':
+          description: Sincronización completada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncCalendarResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /api/calendar/conflicts:
+    get:
+      tags: [Conflictos]
+      summary: Detectar conflictos de horario
+      operationId: getConflicts
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Lista de conflictos detectados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConflictResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    CreateEventRequest:
+      type: object
+      required: [eventType, title, startsAt, endsAt]
+      properties:
+        eventType:
+          type: string
+          enum: [workout, class, trainer_session, nutrition_reminder, custom]
+        referenceId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        reminderMinutes:
+          type: integer
+          default: 30
+
+    UpdateEventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        reminderMinutes:
+          type: integer
+
+    CalendarEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+        referenceId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        reminderMinutes:
+          type: integer
+        externalCalendarId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    SyncCalendarRequest:
+      type: object
+      required: [provider, authToken]
+      properties:
+        provider:
+          type: string
+          enum: [google, apple, outlook]
+        authToken:
+          type: string
+        direction:
+          type: string
+          enum: [bidirectional, import_only, export_only]
+          default: bidirectional
+
+    SyncCalendarResponse:
+      type: object
+      properties:
+        provider:
+          type: string
+        eventsImported:
+          type: integer
+        eventsExported:
+          type: integer
+        lastSyncAt:
+          type: string
+          format: date-time
+
+    ConflictResponse:
+      type: object
+      properties:
+        event1:
+          $ref: '#/components/schemas/CalendarEventResponse'
+        event2:
+          $ref: '#/components/schemas/CalendarEventResponse'
+        overlapMinutes:
+          type: integer
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Proveedor de calendario externo no disponible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,6 @@
+com\spartangoldengym\analiticas\repository\InMemoryMetricsStoreTest.class
+com\spartangoldengym\analiticas\controller\AnalyticsControllerTest.class
+com\spartangoldengym\analiticas\service\AnalyticsServiceTest.class
+com\spartangoldengym\analiticas\config\KafkaStreamsConfigTest.class
+com\spartangoldengym\analiticas\stream\KafkaStreamsTopologyTest.class
+com\spartangoldengym\analiticas\consumer\AnalyticsEventConsumerTest.class

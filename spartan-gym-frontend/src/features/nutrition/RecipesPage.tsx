@@ -58,7 +58,7 @@ export default function RecipesPage() {
 
       {isLoading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress />
+          <CircularProgress aria-label={t('loading')} />
         </Box>
       )}
 
@@ -69,10 +69,10 @@ export default function RecipesPage() {
       )}
 
       {data && data.content.length > 0 && (
-        <Grid container spacing={3}>
+        <Grid container spacing={3} aria-label={t('recipesTitle')}>
           {data.content.map((recipe) => (
             <Grid key={recipe.id} size={{ xs: 12, md: 6 }}>
-              <Card>
+              <Card aria-label={recipe.name}>
                 <CardContent>
                   <Typography variant="h6">{recipe.name}</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -86,11 +86,14 @@ export default function RecipesPage() {
                   </Box>
 
                   <Accordion disableGutters>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-label={`${t('ingredients')} - ${recipe.name}`}
+                    >
                       <Typography variant="body2">{t('ingredients')}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <List dense>
+                      <List dense aria-label={`${t('ingredients')} ${recipe.name}`}>
                         {recipe.ingredients.map((ing, i) => (
                           <ListItem key={i}>
                             <ListItemText primary={ing} />
@@ -101,11 +104,14 @@ export default function RecipesPage() {
                   </Accordion>
 
                   <Accordion disableGutters>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-label={`${t('instructions')} - ${recipe.name}`}
+                    >
                       <Typography variant="body2">{t('instructions')}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <List dense>
+                      <List dense aria-label={`${t('instructions')} ${recipe.name}`}>
                         {recipe.instructions.map((step, i) => (
                           <ListItem key={i}>
                             <ListItemText primary={`${i + 1}. ${step}`} />

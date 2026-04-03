@@ -1,0 +1,254 @@
+openapi: 3.0.3
+info:
+  title: Servicio Notificaciones API
+  version: 1.0.0
+  description: |
+    Microservicio de envío multicanal (push, email, SMS), preferencias y programación de notificaciones.
+    Tecnología: Java 8 + Spring Boot 2.7.x
+
+servers:
+  - url: http://localhost:8089
+    description: Desarrollo local
+  - url: https://api.spartangoldengym.com
+    description: Producción (vía API Gateway)
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/notifications/preferences:
+    get:
+      tags: [Preferencias]
+      summary: Obtener preferencias de notificación del usuario
+      operationId: getPreferences
+      responses:
+        '200':
+          description: Preferencias de notificación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Preferencias]
+      summary: Actualizar preferencias de notificación
+      operationId: updatePreferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferences'
+      responses:
+        '200':
+          description: Preferencias actualizadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/notifications/history:
+    get:
+      tags: [Historial]
+      summary: Historial de notificaciones
+      operationId: getNotificationHistory
+      parameters:
+        - name: channel
+          in: query
+          schema:
+            type: string
+            enum: [push, email, sms]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [sent, received, read, failed]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Historial de notificaciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/notifications/schedule:
+    post:
+      tags: [Programación]
+      summary: Programar notificación
+      operationId: scheduleNotification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleNotificationRequest'
+      responses:
+        '201':
+          description: Notificación programada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduledNotificationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    NotificationPreferences:
+      type: object
+      properties:
+        training:
+          $ref: '#/components/schemas/ChannelPreference'
+        social:
+          $ref: '#/components/schemas/ChannelPreference'
+        payments:
+          $ref: '#/components/schemas/ChannelPreference'
+        nutrition:
+          $ref: '#/components/schemas/ChannelPreference'
+        quietHoursStart:
+          type: string
+          format: time
+          example: "22:00"
+        quietHoursEnd:
+          type: string
+          format: time
+          example: "08:00"
+
+    ChannelPreference:
+      type: object
+      properties:
+        push:
+          type: boolean
+          default: true
+        email:
+          type: boolean
+          default: true
+        sms:
+          type: boolean
+          default: false
+
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        channel:
+          type: string
+          enum: [push, email, sms]
+        status:
+          type: string
+          enum: [sent, received, read, failed]
+        title:
+          type: string
+        content:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+
+    ScheduleNotificationRequest:
+      type: object
+      required: [targetUserId, title, content, scheduledAt]
+      properties:
+        targetUserId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        channel:
+          type: string
+          enum: [push, email, sms]
+        scheduledAt:
+          type: string
+          format: date-time
+
+    ScheduledNotificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        targetUserId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [scheduled, sent, cancelled]
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

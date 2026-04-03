@@ -1,12 +1,27 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { Message } from '@/types';
 
+interface RankingEntry {
+  userId: string;
+  score: number;
+  rank: number;
+}
+
+interface LiveWorkoutUpdate {
+  userId: string;
+  sessionId: string;
+  currentExercise: string;
+  progress: number;
+}
+
 interface WebSocketState {
   connected: boolean;
   activeConversation: string | null;
   incomingMessages: Message[];
   occupancyUpdates: Record<string, number>;
   typingUsers: Record<string, string[]>;
+  rankings: Record<string, RankingEntry[]>;
+  liveWorkouts: Record<string, LiveWorkoutUpdate>;
 }
 
 const initialState: WebSocketState = {
@@ -15,6 +30,8 @@ const initialState: WebSocketState = {
   incomingMessages: [],
   occupancyUpdates: {},
   typingUsers: {},
+  rankings: {},
+  liveWorkouts: {},
 };
 
 const websocketSlice = createSlice({
@@ -43,6 +60,15 @@ const websocketSlice = createSlice({
     clearIncomingMessages(state) {
       state.incomingMessages = [];
     },
+    updateRanking(
+      state,
+      action: PayloadAction<{ category: string; entries: RankingEntry[] }>,
+    ) {
+      state.rankings[action.payload.category] = action.payload.entries;
+    },
+    updateLiveWorkout(state, action: PayloadAction<LiveWorkoutUpdate>) {
+      state.liveWorkouts[action.payload.sessionId] = action.payload;
+    },
   },
 });
 
@@ -52,5 +78,7 @@ export const {
   updateOccupancy,
   setTypingUsers,
   clearIncomingMessages,
+  updateRanking,
+  updateLiveWorkout,
 } = websocketSlice.actions;
 export default websocketSlice.reducer;

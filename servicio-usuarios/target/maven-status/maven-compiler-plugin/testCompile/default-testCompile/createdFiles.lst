@@ -1,0 +1,7 @@
+com\spartangoldengym\usuarios\service\AuditServiceTest.class
+com\spartangoldengym\usuarios\service\UserServiceTest.class
+com\spartangoldengym\usuarios\service\MfaServiceTest.class
+com\spartangoldengym\usuarios\service\JwtServiceTest.class
+com\spartangoldengym\usuarios\service\ProfileServiceTest.class
+com\spartangoldengym\usuarios\controller\UserControllerTest.class
+com\spartangoldengym\usuarios\service\MfaOnboardingServiceTest.class
