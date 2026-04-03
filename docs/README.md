@@ -28,7 +28,13 @@ esquemas de request/response, seguridad JWT y códigos de error estándar.
 
 Esquemas compartidos: [schemas/common.yaml](api/schemas/common.yaml)
 
-## Diagramas de Arquitectura
+## Documentos de Arquitectura
+
+| Documento | Descripción |
+|---|---|
+| [05-arquitectura-microservicios.md](architecture/05-arquitectura-microservicios.md) | Arquitectura completa del backend (14 microservicios, bases de datos, Kafka, seguridad) |
+| [06-arquitectura-frontend-web.md](architecture/06-arquitectura-frontend-web.md) | Arquitectura del frontend web (React 18, Vite, MUI, Redux Toolkit) |
+| [07-arquitectura-app-movil.md](architecture/07-arquitectura-app-movil.md) | Arquitectura de la app móvil (React Native, offline, wearables, accesibilidad) |
 
 ### Diagramas de Secuencia — Flujos Principales
 
@@ -38,6 +44,14 @@ Esquemas compartidos: [schemas/common.yaml](api/schemas/common.yaml)
 | Entrenamiento | [02-flujo-entrenamiento.md](architecture/02-flujo-entrenamiento.md) | Seguimiento, DynamoDB, Timestream, IA Coach |
 | Pago y suscripción | [03-flujo-pago-suscripcion.md](architecture/03-flujo-pago-suscripcion.md) | Pagos, Stripe/Adyen, PayPal |
 | Recomendación IA | [04-flujo-recomendacion-ia.md](architecture/04-flujo-recomendacion-ia.md) | IA Coach, SageMaker, Neptune |
+
+## Guías
+
+| Documento | Audiencia | Descripción |
+|---|---|---|
+| [guia-desarrollo-local.md](guia-desarrollo-local.md) | Desarrolladores | Configuración del entorno local, ejecución de tests, convenciones |
+| [guia-despliegue.md](guia-despliegue.md) | DevOps / Desarrolladores | Despliegue de infraestructura (Terraform), backend (EKS), frontend (S3/CloudFront), móvil (stores) |
+| [guia-usuario-final.md](guia-usuario-final.md) | Usuarios finales | Funcionalidades de la plataforma, primeros pasos, roles, privacidad |
 
 ## Seguridad
 
